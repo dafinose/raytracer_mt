@@ -153,8 +153,13 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="header\camera.cuh" />
     <ClInclude Include="header\cuda_render.cuh" />
+    <ClInclude Include="header\hitable.cuh" />
+    <ClInclude Include="header\hitable_list.cuh" />
+    <ClInclude Include="header\material.cuh" />
     <ClInclude Include="header\ray.cuh" />
+    <ClInclude Include="header\sphere.cuh" />
     <ClInclude Include="header\vec3.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
