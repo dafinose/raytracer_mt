@@ -155,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="header\camera.cuh" />
     <ClInclude Include="header\cuda_render.cuh" />
+    <ClInclude Include="header\shader.h" />
     <ClInclude Include="header\hitable.cuh" />
     <ClInclude Include="header\hitable_list.cuh" />
     <ClInclude Include="header\material.cuh" />

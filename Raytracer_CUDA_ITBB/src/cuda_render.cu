@@ -6,7 +6,7 @@
 #include "../header/camera.cuh"
 #include "../header/material.cuh"
 
-#define checkCudaErrors(val) check_cuda( (val), #val, __FILE__, __LINE__ )
+
 void check_cuda(cudaError_t result, char const* const func, const char* const file, int const line)
 {
 	if (result)
@@ -136,7 +136,7 @@ __global__ void free_world(hitable** d_list, hitable** d_world, camera** d_camer
 	delete* d_camera;
 }
 
-int cuda_main()
+int cuda_main(cudaGraphicsResource* resource)
 {
 	// Bilddimensionen
 	int nx = 800;
@@ -152,7 +152,7 @@ int cuda_main()
 
 	int num_pixels = nx * ny;
 	// Größe des Frambuffers
-	size_t fb_size = 3 * num_pixels * sizeof(vec3);
+	size_t fb_size = num_pixels * sizeof(vec3);
 
 	// Framebuffer allokieren
 	vec3* fb;
@@ -194,19 +194,15 @@ int cuda_main()
 	double timer_seconds = ((double)(stop - start)) / CLOCKS_PER_SEC;
 	std::cerr << "took " << timer_seconds << " seconds.\n";
 
-	// Bild ausgeben
-	std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-	for (int j = 0; j < ny; j++)
-	{
-		for (int i = 0; i < nx; i++)
-		{
-			size_t pixel_index = j * nx + i;
-			int ir = int(255.99 * fb[pixel_index].r());
-			int ig = int(255.99 * fb[pixel_index].g());
-			int ib = int(255.99 * fb[pixel_index].b());
-			//std::cout << ir << " " << ig << " " << ib << "\n";
-		}
-	}
+	cudaArray* fb_dev_array;
+	// Bild uebergeben
+	//size_t fb_size_t = num_pixels * sizeof(vec3);
+	checkCudaErrors(cudaGraphicsMapResources(1, &resource, 0));
+	checkCudaErrors(cudaGraphicsSubResourceGetMappedArray(&fb_dev_array, resource, 0, 0));
+
+	checkCudaErrors(cudaMemcpy(fb_dev_array, fb, fb_size, cudaMemcpyDeviceToDevice));
+
+	checkCudaErrors(cudaGraphicsUnmapResources(1, &resource, 0));
 
 	// Aufraeumen
 	checkCudaErrors(cudaDeviceSynchronize());

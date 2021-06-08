@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include "../header/cuda_render.cuh"
+#include <cuda_gl_interop.h>
+#include "../header/shader.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -20,7 +22,6 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Raytracing Comparison", NULL, NULL);
     if (window == NULL)
     {
@@ -37,32 +38,61 @@ int main()
         return -1;
     }
 
+    shader shaderProgram = shader("./shaders/v_shader.glsl", "./shaders/f_shader.glsl");
+
+    float2* screenSpaceQuadVertices = (float2*)malloc(sizeof(float2) * 4);
+    screenSpaceQuadVertices[0] = make_float2(-1.0f, -1.0f);
+    screenSpaceQuadVertices[1] = make_float2(1.0f, -1.0f);
+    screenSpaceQuadVertices[2] = make_float2(-1.0f, 1.0f);
+    screenSpaceQuadVertices[3] = make_float2(1.0f, 1.0f);
+
+    float2* screenSpaceQuadUV = (float2*)malloc(sizeof(float2) * 4);
+    screenSpaceQuadUV[0] = make_float2(0.0f, 0.0f);
+    screenSpaceQuadUV[1] = make_float2(1.0f, 0.0f);
+    screenSpaceQuadUV[2] = make_float2(0.0f, 1.0f);
+    screenSpaceQuadUV[3] = make_float2(1.0f, 1.0f);
+
+
     // Bufferobjekte
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    unsigned int screenQuadVBO, screenQuadVAO, screenUV_VBO;
+    glGenVertexArrays(1, &screenQuadVAO);
+    
+    glGenBuffers(1, &screenQuadVBO);
+    glGenBuffers(1, &screenUV_VBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
+    glBindVertexArray(screenQuadVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(3 * SCR_WIDTH * SCR_HEIGHT * sizeof(vec3)), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(3 * SCR_WIDTH * SCR_HEIGHT * sizeof(vec3)), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, screenQuadVBO);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(float2), screenSpaceQuadVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float2), (void*)0);
     glEnableVertexAttribArray(0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, screenUV_VBO);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(float2), screenSpaceQuadUV, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float2), (void*)0);
+    glEnableVertexAttribArray(1);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0);
+
+    unsigned int screenTexture;
+
+    // Textur binden
+    glGenTextures(1, &screenTexture);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    cudaGraphicsResource* cuda_Resource;
+    checkCudaErrors(cudaGraphicsGLRegisterImage(&cuda_Resource, screenTexture, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsNone));
 
     // render loop
     // -----------
@@ -77,10 +107,20 @@ int main()
         //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         //glClear(GL_COLOR_BUFFER_BIT);
         
+
         if (i < 1) {
             i++;
-            cuda_main();
+            cuda_main(cuda_Resource);
         }
+        
+        shaderProgram.useShader();
+        glBindTexture(GL_TEXTURE_2D, screenTexture);
+        glUniform1i(glGetUniformLocation(shaderProgram.ID, "screenTexture"), 0);
+        
+        //Drawcall
+        glBindVertexArray(screenQuadVAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
+        glBindVertexArray(0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
