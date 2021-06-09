@@ -54,7 +54,7 @@ int main()
 
 
     // Bufferobjekte
-    unsigned int screenQuadVBO, screenQuadVAO, screenUV_VBO;
+    unsigned int screenQuadVBO, screenQuadVAO, screenUV_VBO, textureBuffer;
     glGenVertexArrays(1, &screenQuadVAO);
     
     glGenBuffers(1, &screenQuadVBO);
@@ -81,7 +81,6 @@ int main()
     // Textur binden
     glGenTextures(1, &screenTexture);
     glBindTexture(GL_TEXTURE_2D, screenTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -89,10 +88,17 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    glGenBuffers(1, &textureBuffer);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, textureBuffer);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, SCR_WIDTH * SCR_HEIGHT * sizeof(vec3), 0, GL_DYNAMIC_COPY);
+
     cudaGraphicsResource* cuda_Resource;
-    checkCudaErrors(cudaGraphicsGLRegisterImage(&cuda_Resource, screenTexture, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsNone));
+    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&cuda_Resource, textureBuffer, cudaGraphicsRegisterFlagsNone));
+
+    //checkCudaErrors(cudaGraphicsGLRegisterImage(&cuda_Resource, screenTexture, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsNone));
 
     // render loop
     // -----------
@@ -113,13 +119,20 @@ int main()
             cuda_main(cuda_Resource);
         }
         
-        shaderProgram.useShader();
+        // Daten in die Textur schreiben
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, textureBuffer);
         glBindTexture(GL_TEXTURE_2D, screenTexture);
+
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_RGB, GL_FLOAT, 0);
+
+        shaderProgram.useShader();
+
         glUniform1i(glGetUniformLocation(shaderProgram.ID, "screenTexture"), 0);
+        
         
         //Drawcall
         glBindVertexArray(screenQuadVAO);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

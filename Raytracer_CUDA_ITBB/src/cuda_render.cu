@@ -144,8 +144,8 @@ int cuda_main(cudaGraphicsResource* resource)
 	int ns = 10;
 
 	// Threaddimensionen für CUDA
-	int tx = 8;
-	int ty = 8;
+	int tx = 32;
+	int ty = 32;
 
 	std::cerr << "Rendering a " << nx << "x" << ny << " image ";
 	std::cerr << "in " << tx << "x" << ty << " blocks.\n";
@@ -156,7 +156,7 @@ int cuda_main(cudaGraphicsResource* resource)
 
 	// Framebuffer allokieren
 	vec3* fb;
-	checkCudaErrors(cudaMallocManaged((void**)&fb, fb_size));
+	checkCudaErrors(cudaMalloc((void**)&fb, fb_size));
 
 	// allocate random state
 	curandState* d_rand_state;
@@ -176,6 +176,7 @@ int cuda_main(cudaGraphicsResource* resource)
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
+	//texture<float, 2> texRef;
 
 	clock_t start, stop;
 	start = clock();
@@ -195,12 +196,17 @@ int cuda_main(cudaGraphicsResource* resource)
 	std::cerr << "took " << timer_seconds << " seconds.\n";
 
 	cudaArray* fb_dev_array;
+	vec3* device_pointer;
 	// Bild uebergeben
 	//size_t fb_size_t = num_pixels * sizeof(vec3);
 	checkCudaErrors(cudaGraphicsMapResources(1, &resource, 0));
-	checkCudaErrors(cudaGraphicsSubResourceGetMappedArray(&fb_dev_array, resource, 0, 0));
+	//checkCudaErrors(cudaGraphicsSubResourceGetMappedArray(&fb_dev_array, resource, 0, 0));
+	checkCudaErrors(cudaGraphicsResourceGetMappedPointer((void**) &device_pointer , &fb_size, resource));
 
-	checkCudaErrors(cudaMemcpy(fb_dev_array, fb, fb_size, cudaMemcpyDeviceToDevice));
+	checkCudaErrors(cudaMemcpy(device_pointer, fb, fb_size, cudaMemcpyDeviceToDevice));
+	
+	//checkCudaErrors(cudaMemcpy2DToArray(fb_dev_array, 0, 0, fb, nx * sizeof(vec3), nx * sizeof(vec3), ny, cudaMemcpyDeviceToDevice));
+	checkCudaErrors(cudaDeviceSynchronize());
 
 	checkCudaErrors(cudaGraphicsUnmapResources(1, &resource, 0));
 
