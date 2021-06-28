@@ -5,6 +5,7 @@
 #include "../header/cuda_render.cuh"
 #include <cuda_gl_interop.h>
 #include "../header/shader.h"
+#include "../header/itbb_render.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -88,17 +89,25 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    void* fb;
+
+    // ITBB Render
+    itbb_main(&fb);
+    // For CUDA: NULL for ITBB: fb
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, fb);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glGenBuffers(1, &textureBuffer);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, textureBuffer);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, SCR_WIDTH * SCR_HEIGHT * sizeof(vec3), 0, GL_DYNAMIC_COPY);
 
-    cudaGraphicsResource* cuda_Resource;
-    checkCudaErrors(cudaGraphicsGLRegisterBuffer(&cuda_Resource, textureBuffer, cudaGraphicsRegisterFlagsNone));
+    // CUDA
+    //glGenBuffers(1, &textureBuffer);
+    //glBindBuffer(GL_PIXEL_UNPACK_BUFFER, textureBuffer);
+    //glBufferData(GL_PIXEL_UNPACK_BUFFER, SCR_WIDTH * SCR_HEIGHT * sizeof(vec3), 0, GL_DYNAMIC_COPY);
+
+    //cudaGraphicsResource* cuda_Resource;
+    //checkCudaErrors(cudaGraphicsGLRegisterBuffer(&cuda_Resource, textureBuffer, cudaGraphicsRegisterFlagsNone));
 
     //checkCudaErrors(cudaGraphicsGLRegisterImage(&cuda_Resource, screenTexture, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsNone));
+    // CUDA
 
     // render loop
     // -----------
@@ -116,14 +125,15 @@ int main()
 
         if (i < 1) {
             i++;
-            cuda_main(cuda_Resource);
+            //cuda_main(cuda_Resource);
         }
         
         // Daten in die Textur schreiben
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, textureBuffer);
+        // CUDA
+        //glBindBuffer(GL_PIXEL_UNPACK_BUFFER, textureBuffer);
         glBindTexture(GL_TEXTURE_2D, screenTexture);
-
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_RGB, GL_FLOAT, 0);
+        // CUDA
+        //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_RGB, GL_FLOAT, 0);
 
         shaderProgram.useShader();
 

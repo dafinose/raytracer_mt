@@ -4,6 +4,15 @@
 #include <stdlib.h>
 #include <iostream>
 
+#ifndef __host__
+#define __host__
+#endif // !__host__
+
+#ifndef __device__
+#define __device__
+#endif // !__device__
+
+
 class vec3 {
 
 

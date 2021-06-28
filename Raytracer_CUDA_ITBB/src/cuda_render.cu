@@ -56,8 +56,6 @@ __global__ void render_init(int max_x, int max_y, curandState* rand_state) {
 	int pixel_index = j * max_x + i;
 	// Original: Each thread gets same seed, a different sequence number, no offset
 	// curand_init(1984, pixel_index, 0, &rand_state[pixel_index]);
-	// BUGFIX, see Issue#2: Each thread gets different seed, same sequence for
-	// performance improvement of about 2x!
 	curand_init(1984 + pixel_index, 0, 0, &rand_state[pixel_index]);
 }
 
@@ -86,21 +84,25 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns, camera** cam, hit
 
 __global__ void createWorld(hitable** d_list, hitable** d_world, camera** d_camera, int nx, int ny, curandState* rand_state) {
 	if (threadIdx.x == 0 && blockIdx.x == 0) {
-		curandState local_rand_state = *rand_state;
+		//curandState local_rand_state = *rand_state;
 		d_list[0] = new sphere(vec3(0, -1000.0, -1), 1000,
 			new lambertian(vec3(0.5, 0.5, 0.5)));
 		int i = 1;
 		for (int a = -11; a < 11; a++) {
 			for (int b = -11; b < 11; b++) {
-				float choose_mat = RND;
-				vec3 center(a + RND, 0.2, b + RND);
+				//float choose_mat = RND;
+				float choose_mat = 0.0f;
+				//vec3 center(a + RND, 0.2, b + RND);
+				vec3 center(a, 0.2, b);
 				if (choose_mat < 0.8f) {
 					d_list[i++] = new sphere(center, 0.2,
-						new lambertian(vec3(RND * RND, RND * RND, RND * RND)));
+						//new lambertian(vec3(RND * RND, RND * RND, RND * RND)));
+						new lambertian(vec3(0.1f, 0.8f, 0.5f)));
 				}
 				else if (choose_mat < 0.95f) {
 					d_list[i++] = new sphere(center, 0.2,
-						new metal(vec3(0.5f * (1.0f + RND), 0.5f * (1.0f + RND), 0.5f * (1.0f + RND)), 0.5f * RND));
+						//new metal(vec3(0.5f * (1.0f + RND), 0.5f * (1.0f + RND), 0.5f * (1.0f + RND)), 0.5f * RND));
+						new metal(vec3(0.5f * (1.0f), 0.5f * (1.0f), 0.5f * (1.0f)), 0.5f));
 				}
 				else {
 					d_list[i++] = new sphere(center, 0.2, new dielectric(1.5));
@@ -110,7 +112,7 @@ __global__ void createWorld(hitable** d_list, hitable** d_world, camera** d_came
 		d_list[i++] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
 		d_list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
 		d_list[i++] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
-		*rand_state = local_rand_state;
+		//*rand_state = local_rand_state;
 		*d_world = new hitable_list(d_list, 22 * 22 + 1 + 3);
 
 		vec3 lookfrom(13, 2, 3);

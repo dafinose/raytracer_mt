@@ -15,10 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\application_main.cu">
+    <ClCompile Include="src\application_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\itbb_render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -37,6 +40,27 @@
     <ClInclude Include="header\camera.cuh" />
     <ClInclude Include="header\material.cuh" />
     <ClInclude Include="header\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header\itbb_render.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header\itbb_camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header\itbb_material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header\itbb_hitable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header\itbb_sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header\itbb_hitable_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

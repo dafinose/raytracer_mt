@@ -4,9 +4,9 @@
 
 class hitable_list : public hitable {
 public:
-	__device__ hitable_list() {}
-	__device__ hitable_list(hitable **l, int n) { list = l; list_size = n; }
-	__device__ virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
+	__device__ inline hitable_list() {}
+	__device__ inline hitable_list(hitable **l, int n) { list = l; list_size = n; }
+	__device__ virtual inline bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
 	hitable** list;
 	int list_size;
 };

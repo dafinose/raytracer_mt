@@ -79,7 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.3\include;D:\OpenGL\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.3\include;D:\OpenGL\include;C:\Program Files (x86)\Intel\oneAPI\tbb\2021.2.0\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.3\lib\x64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.3\lib\Win32;D:\OpenGL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -123,8 +123,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(CudaToolkitLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;cudart.lib;tbb_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Intel\oneAPI\tbb\2021.2.0\lib\intel64\vc14;$(CudaToolkitLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,8 +144,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\application_main.cu" />
+    <ClCompile Include="src\application_main.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\itbb_render.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\cuda_render.cu">
@@ -155,12 +156,19 @@
   <ItemGroup>
     <ClInclude Include="header\camera.cuh" />
     <ClInclude Include="header\cuda_render.cuh" />
+    <ClInclude Include="header\itbb_camera.h" />
+    <ClInclude Include="header\itbb_hitable.h" />
+    <ClInclude Include="header\itbb_hitable_list.h" />
+    <ClInclude Include="header\itbb_material.h" />
+    <ClInclude Include="header\itbb_render.h" />
+    <ClInclude Include="header\itbb_sphere.h" />
     <ClInclude Include="header\shader.h" />
     <ClInclude Include="header\hitable.cuh" />
     <ClInclude Include="header\hitable_list.cuh" />
     <ClInclude Include="header\material.cuh" />
     <ClInclude Include="header\ray.cuh" />
     <ClInclude Include="header\sphere.cuh" />
+    <ClInclude Include="header\util.h" />
     <ClInclude Include="header\vec3.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
