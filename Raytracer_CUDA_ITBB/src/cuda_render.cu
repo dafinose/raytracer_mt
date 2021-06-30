@@ -141,8 +141,8 @@ __global__ void free_world(hitable** d_list, hitable** d_world, camera** d_camer
 int cuda_main(cudaGraphicsResource* resource)
 {
 	// Bilddimensionen
-	int nx = 800;
-	int ny = 600;
+	int nx = 1920;
+	int ny = 1080;
 	int ns = 10;
 
 	// Threaddimensionen für CUDA

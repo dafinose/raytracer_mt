@@ -106,9 +106,11 @@ void free_world(itbb_hitable** d_list, itbb_hitable** d_world, itbb_camera** d_c
 int itbb_main(void** pixeldata) 
 {
 	// Bilddimensionen
-	int nx = 800;
-	int ny = 600;
-	int ns = 1;
+	int nx = 1920;
+	int ny = 1080;
+	int ns = 10;
+
+	std::cerr << "Rendering a " << nx << "x" << ny << " image ";
 
 	int num_pixels = nx * ny;
 	// Größe des Frambuffers
