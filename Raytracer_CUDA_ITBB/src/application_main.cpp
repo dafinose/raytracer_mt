@@ -6,13 +6,14 @@
 #include <cuda_gl_interop.h>
 #include "../header/shader.h"
 #include "../header/itbb_render.h"
+#include <Windows.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 // settings
-unsigned const int SCR_WIDTH = 1920;
-unsigned const int SCR_HEIGHT = 1080;
+unsigned int SCR_WIDTH = 800;
+unsigned int SCR_HEIGHT = 600;
 
 int i = 0;
 
@@ -21,6 +22,17 @@ int number_of_samples = 10;
 
 int main()
 {
+	SCR_WIDTH = GetPrivateProfileIntA("Settings", "SCR_WIDTH", 800, "./settings.ini");
+	SCR_HEIGHT = GetPrivateProfileIntA("Settings", "SCR_HEIGHT", 600, "./settings.ini");
+	isRenderingCuda = GetPrivateProfileIntA("Settings", "renderCuda", 1, "./settings.ini");
+	number_of_samples = GetPrivateProfileIntA("Settings", "samples", 10, "./settings.ini");
+	
+	std::cout << "render settings:" << std::endl;
+	std::cout << "width: " << SCR_WIDTH << std::endl;
+	std::cout << "height: " << SCR_HEIGHT << std::endl;
+	std::cout << "rendering with cuda: " << isRenderingCuda << std::endl;
+	std::cout << "samples: " << number_of_samples << std::endl;
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
