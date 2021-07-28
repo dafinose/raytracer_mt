@@ -11,12 +11,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 // settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+unsigned const int SCR_WIDTH = 1920;
+unsigned const int SCR_HEIGHT = 1080;
 
 int i = 0;
 
 bool isRenderingCuda = true;
+int number_of_samples = 10;
 
 int main()
 {
@@ -137,11 +138,11 @@ int main()
 			i++;
 			if (isRenderingCuda)
 			{
-				cuda_main(cuda_Resource);
+				cuda_main(cuda_Resource, SCR_WIDTH, SCR_HEIGHT, number_of_samples);
 			}
 			else
 			{
-				itbb_main(&fb);
+				itbb_main(&fb, SCR_WIDTH, SCR_HEIGHT, number_of_samples);
 			}
 		}
 

@@ -25,4 +25,4 @@ struct Render_Pixel
 	void operator()(const blocked_range<size_t>& range) const;
 };
 
-int itbb_main(void** fb);
+int itbb_main(void** fb, int x, int y, int samples);

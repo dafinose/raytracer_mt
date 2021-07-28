@@ -1,0 +1,16 @@
+-r
+D:\Masterarbeit\Raytracer_CUDA_ITBB\VTune Profiler Results\Raytracer_CUDA_ITBB\r001hs
+--stack-stitching
+--data-limit-mb=1000
+--disk-space-limit=0
+--mrte-type=java,dotnet,python
+--itt-config=frame
+--itt-config=task,event,counter
+--stackwalk=offline
+--mrte-mode=auto
+--type=cpu:counters:nostack
+--type=cpu:stack
+--interval=10
+--app-working-dir=D:\Masterarbeit\Raytracer_CUDA_ITBB\x64\Release
+--
+D:\Masterarbeit\Raytracer_CUDA_ITBB\x64\Release\Raytracer_CUDA_ITBB.exe

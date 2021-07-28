@@ -11,6 +11,6 @@
 #define checkCudaErrors(val) check_cuda( (val), #val, __FILE__, __LINE__ )
 void check_cuda(cudaError_t result, char const* const func, const char* const file, int const line);
 
-int cuda_main(cudaGraphicsResource* resource);
+int cuda_main(cudaGraphicsResource* resource, int x, int y, int samples);
 __global__ void render(float* fb, int max_x, int max_y);
 

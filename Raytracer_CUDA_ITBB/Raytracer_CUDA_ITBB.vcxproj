@@ -146,6 +146,9 @@
       <AdditionalLibraryDirectories>$(CudaToolkitLibDir);C:\Program Files (x86)\Intel\oneAPI\tbb\2021.2.0\lib\intel64\vc14;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;cudart.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <CudaCompile>
+      <PtxAsOptionV>true</PtxAsOptionV>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\application_main.cpp" />

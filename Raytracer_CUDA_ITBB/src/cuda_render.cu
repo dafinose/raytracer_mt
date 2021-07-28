@@ -40,7 +40,7 @@ __device__ vec3 color(const ray& r, hitable** world, curandState* local_rand_sta
 			return cur_attenuation * c;
 		}
 	}
-	return vec3(0.0, 0.0, 0.0); // exceeded recursion
+	return vec3(0.0, 0.0, 0.0);
 }
 
 __global__ void rand_init(curandState* rand_state) {
@@ -86,7 +86,7 @@ __global__ void createWorld(hitable** d_list, hitable** d_world, camera** d_came
 	if (threadIdx.x == 0 && blockIdx.x == 0) {
 		//curandState local_rand_state = *rand_state;
 		d_list[0] = new sphere(vec3(0, -1000.0, -1), 1000,
-			new lambertian(vec3(0.5, 0.5, 0.5)));
+			new diffuse(vec3(0.5, 0.5, 0.5)));
 		int i = 1;
 		for (int a = -11; a < 11; a++) {
 			for (int b = -11; b < 11; b++) {
@@ -97,7 +97,7 @@ __global__ void createWorld(hitable** d_list, hitable** d_world, camera** d_came
 				if (choose_mat < 0.8f) {
 					d_list[i++] = new sphere(center, 0.2,
 						//new lambertian(vec3(RND * RND, RND * RND, RND * RND)));
-						new lambertian(vec3(0.1f, 0.8f, 0.5f)));
+						new diffuse(vec3(0.6f, 0.9f, 0.1f)));
 				}
 				else if (choose_mat < 0.95f) {
 					d_list[i++] = new sphere(center, 0.2,
@@ -110,7 +110,7 @@ __global__ void createWorld(hitable** d_list, hitable** d_world, camera** d_came
 			}
 		}
 		d_list[i++] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
-		d_list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
+		d_list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new diffuse(vec3(0.4, 0.2, 0.1)));
 		d_list[i++] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
 		//*rand_state = local_rand_state;
 		*d_world = new hitable_list(d_list, 22 * 22 + 1 + 3);
@@ -138,16 +138,16 @@ __global__ void free_world(hitable** d_list, hitable** d_world, camera** d_camer
 	delete* d_camera;
 }
 
-int cuda_main(cudaGraphicsResource* resource)
+int cuda_main(cudaGraphicsResource* resource, int x, int y, int samples)
 {
 	// Bilddimensionen
-	int nx = 1920;
-	int ny = 1080;
-	int ns = 10;
+	int nx = x;
+	int ny = y;
+	int ns = samples;
 
 	// Threaddimensionen für CUDA
-	int tx = 32;
-	int ty = 32;
+	int tx = 24;
+	int ty = 24;
 
 	std::cerr << "Rendering a " << nx << "x" << ny << " image ";
 	std::cerr << "in " << tx << "x" << ty << " blocks.\n";

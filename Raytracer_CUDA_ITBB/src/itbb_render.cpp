@@ -52,7 +52,7 @@ void createWorld(itbb_hitable** d_list, itbb_hitable** d_world, itbb_camera** d_
 
 	//curandState local_rand_state = *rand_state;
 	d_list[0] = new itbb_sphere(vec3(0, -1000.0, -1), 1000,
-		new lambertian(vec3(0.5, 0.5, 0.5)));
+		new diffuse(vec3(0.5, 0.5, 0.5)));
 	int i = 1;
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
@@ -63,7 +63,7 @@ void createWorld(itbb_hitable** d_list, itbb_hitable** d_world, itbb_camera** d_
 			if (choose_mat < 0.8f) {
 				d_list[i++] = new itbb_sphere(center, 0.2,
 					//new lambertian(vec3(RND * RND, RND * RND, RND * RND)));
-					new lambertian(vec3(0.1f, 0.8f, 0.5f)));
+					new diffuse(vec3(0.1f, 0.4f, 0.8f)));
 			}
 			else if (choose_mat < 0.95f) {
 				d_list[i++] = new itbb_sphere(center, 0.2,
@@ -76,7 +76,7 @@ void createWorld(itbb_hitable** d_list, itbb_hitable** d_world, itbb_camera** d_
 		}
 	}
 	d_list[i++] = new itbb_sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
-	d_list[i++] = new itbb_sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
+	d_list[i++] = new itbb_sphere(vec3(-4, 1, 0), 1.0, new diffuse(vec3(0.4, 0.2, 0.1)));
 	d_list[i++] = new itbb_sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
 	//*rand_state = local_rand_state;
 	*d_world = new itbb_hitable_list(d_list, 22 * 22 + 1 + 3);
@@ -103,12 +103,12 @@ void free_world(itbb_hitable** d_list, itbb_hitable** d_world, itbb_camera** d_c
 	delete* d_camera;
 }
 
-int itbb_main(void** pixeldata) 
+int itbb_main(void** pixeldata, int x, int y, int samples) 
 {
 	// Bilddimensionen
-	int nx = 1920;
-	int ny = 1080;
-	int ns = 10;
+	int nx = x;
+	int ny = y;
+	int ns = samples;
 
 	std::cerr << "Rendering a " << nx << "x" << ny << " image ";
 

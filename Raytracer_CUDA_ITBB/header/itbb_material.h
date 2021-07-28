@@ -34,9 +34,9 @@ public:
     __device__ virtual bool scatter(const ray& r_in, const itbb_hit_record& rec, vec3& attenuation, ray& scattered) const = 0;
 };
 
-class lambertian : public itbb_material {
+class diffuse : public itbb_material {
 public:
-    __device__ lambertian(const vec3& a) : albedo(a) {}
+    __device__ diffuse(const vec3& a) : albedo(a) {}
     __device__ virtual bool scatter(const ray& r_in, const itbb_hit_record& rec, vec3& attenuation, ray& scattered) const {
         vec3 target = rec.p + rec.normal + random_in_unit_sphere();
         scattered = ray(rec.p, target - rec.p);
